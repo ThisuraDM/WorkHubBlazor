@@ -1,0 +1,69 @@
+﻿@page "/workers/create"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Worker</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Worker" OnValidSubmit="AddWorker" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="Worker.Name" class="form-control" /> 
+                <ValidationMessage For="() => Worker.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="bday" class="form-label">Bday:</label> 
+                <InputDate id="bday" @bind-Value="Worker.Bday" class="form-control" /> 
+                <ValidationMessage For="() => Worker.Bday" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="city" class="form-label">City:</label> 
+                <InputText id="city" @bind-Value="Worker.City" class="form-control" /> 
+                <ValidationMessage For="() => Worker.City" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="province" class="form-label">Province:</label> 
+                <InputText id="province" @bind-Value="Worker.Province" class="form-control" /> 
+                <ValidationMessage For="() => Worker.Province" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="isactive" class="form-label">IsActive:</label> 
+                <InputCheckbox id="isactive" @bind-Value="Worker.IsActive" class="form-check-input" /> 
+                <ValidationMessage For="() => Worker.IsActive" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phoneno" class="form-label">PhoneNo:</label> 
+                <InputText id="phoneno" @bind-Value="Worker.PhoneNo" class="form-control" /> 
+                <ValidationMessage For="() => Worker.PhoneNo" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/workers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Worker Worker { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddWorker()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Worker.Add(Worker);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/workers");
+    }
+}

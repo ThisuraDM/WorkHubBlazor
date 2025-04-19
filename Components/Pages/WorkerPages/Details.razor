@@ -1,0 +1,56 @@
+﻿@page "/workers/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Worker</h2>
+    <hr />
+    @if (worker is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@worker.Name</dd>
+            <dt class="col-sm-2">Bday</dt>
+            <dd class="col-sm-10">@worker.Bday</dd>
+            <dt class="col-sm-2">City</dt>
+            <dd class="col-sm-10">@worker.City</dd>
+            <dt class="col-sm-2">Province</dt>
+            <dd class="col-sm-10">@worker.Province</dd>
+            <dt class="col-sm-2">IsActive</dt>
+            <dd class="col-sm-10">@worker.IsActive</dd>
+            <dt class="col-sm-2">PhoneNo</dt>
+            <dd class="col-sm-10">@worker.PhoneNo</dd>
+        </dl>
+        <div>
+            <a href="@($"/workers/edit?id={worker.Id}")">Edit</a> |
+            <a href="@($"/workers")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Worker? worker;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        worker = await context.Worker.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (worker is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

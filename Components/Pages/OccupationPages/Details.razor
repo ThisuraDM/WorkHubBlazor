@@ -1,0 +1,48 @@
+﻿@page "/occupations/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Occupation</h2>
+    <hr />
+    @if (occupation is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@occupation.Name</dd>
+            <dt class="col-sm-2">IsActive</dt>
+            <dd class="col-sm-10">@occupation.IsActive</dd>
+        </dl>
+        <div>
+            <a href="@($"/occupations/edit?id={occupation.Id}")">Edit</a> |
+            <a href="@($"/occupations")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Occupation? occupation;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        occupation = await context.Occupation.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (occupation is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

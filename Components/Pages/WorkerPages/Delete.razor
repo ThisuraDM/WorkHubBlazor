@@ -1,0 +1,75 @@
+﻿@page "/workers/delete"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Worker</h2>
+    <hr />
+    @if (worker is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@worker.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Bday</dt>
+            <dd class="col-sm-10">@worker.Bday</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">City</dt>
+            <dd class="col-sm-10">@worker.City</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Province</dt>
+            <dd class="col-sm-10">@worker.Province</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">IsActive</dt>
+            <dd class="col-sm-10">@worker.IsActive</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">PhoneNo</dt>
+            <dd class="col-sm-10">@worker.PhoneNo</dd>
+        </dl>
+        <EditForm method="post" Model="worker" OnValidSubmit="DeleteWorker" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(worker is null)">Delete</button> |
+            <a href="/workers">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Worker? worker;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        worker = await context.Worker.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (worker is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteWorker()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Worker.Remove(worker!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/workers");
+    }
+}

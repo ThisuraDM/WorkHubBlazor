@@ -1,0 +1,105 @@
+﻿@page "/workeroccupations/create"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>WorkerOccupation</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="WorkerOccupation" OnValidSubmit="AddWorkerOccupation" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="worker" class="form-label">Worker:</label>
+                <InputSelect id="worker" @bind-Value="WorkerOccupation.WorkerId" class="form-control">
+                    <option value="">-- Select Worker --</option>
+                    @foreach (var worker in Workers)
+                    {
+                        <option value="@worker.Id">@worker.Name (@worker.City, @worker.Province)</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => WorkerOccupation.WorkerId" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="occupation" class="form-label">Occupation:</label>
+                <InputSelect id="occupation" @bind-Value="WorkerOccupation.OccupationId" class="form-control">
+                    <option value="">-- Select Occupation --</option>
+                    @foreach (var occupation in Occupations)
+                    {
+                        <option value="@occupation.Id">@occupation.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => WorkerOccupation.OccupationId" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="rate" class="form-label">Rate:</label>
+                <InputNumber id="rate" @bind-Value="WorkerOccupation.Rate" class="form-control" />
+                <ValidationMessage For="() => WorkerOccupation.Rate" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="ratetype" class="form-label">Rate Type:</label>
+                <InputSelect id="ratetype" @bind-Value="WorkerOccupation.RateType" class="form-control">
+                    <option value="">-- Select Rate Type --</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="taskbased">Task-based</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </InputSelect>
+                <ValidationMessage For="() => WorkerOccupation.RateType" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="rating" class="form-label">Rating (1-5):</label>
+                <InputNumber id="rating" @bind-Value="WorkerOccupation.Rating" class="form-control" min="1" max="5" />
+                <ValidationMessage For="() => WorkerOccupation.Rating" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputTextArea id="description" @bind-Value="WorkerOccupation.Description" class="form-control" />
+                <ValidationMessage For="() => WorkerOccupation.Description" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/workeroccupations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private WorkerOccupation WorkerOccupation { get; set; } = new();
+
+    private List<Worker> Workers { get; set; } = new();
+    private List<Occupation> Occupations { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        
+        // Load active workers and occupations
+        Workers = await context.Worker
+            .Where(w => w.IsActive)
+            .OrderBy(w => w.Name)
+            .ToListAsync();
+            
+        Occupations = await context.Occupation
+            .Where(o => o.IsActive)
+            .OrderBy(o => o.Name)
+            .ToListAsync();
+    }
+
+    private async Task AddWorkerOccupation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.WorkerOccupation.Add(WorkerOccupation);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/workeroccupations");
+    }
+}

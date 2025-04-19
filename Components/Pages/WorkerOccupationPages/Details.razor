@@ -1,0 +1,56 @@
+﻿@page "/workeroccupations/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp.Models
+@inject IDbContextFactory<BlazorApp.Data.BlazorAppContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>WorkerOccupation</h2>
+    <hr />
+    @if (workeroccupation is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">WorkerId</dt>
+            <dd class="col-sm-10">@workeroccupation.WorkerId</dd>
+            <dt class="col-sm-2">OccupationId</dt>
+            <dd class="col-sm-10">@workeroccupation.OccupationId</dd>
+            <dt class="col-sm-2">Rate</dt>
+            <dd class="col-sm-10">@workeroccupation.Rate</dd>
+            <dt class="col-sm-2">RateType</dt>
+            <dd class="col-sm-10">@workeroccupation.RateType</dd>
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@workeroccupation.Rating</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@workeroccupation.Description</dd>
+        </dl>
+        <div>
+            <a href="@($"/workeroccupations/edit?id={workeroccupation.Id}")">Edit</a> |
+            <a href="@($"/workeroccupations")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private WorkerOccupation? workeroccupation;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        workeroccupation = await context.WorkerOccupation.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (workeroccupation is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
